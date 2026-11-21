@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QCM Studio</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  --fond: #f3f5f8;
+  --carte: #ffffff;
+  --texte: #1b2433;
+  --discret: #5b6676;
+  --trait: #d6dce5;
+  --accent: #3f56a6;
+  --accent-clair: #e8edfa;
+  --ok: #1d6f46;
+  --ok-clair: #e1f2e8;
+  --alerte: #8a5300;
+  --alerte-clair: #fff4dc;
+  --erreur: #b3363d;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--fond); color: var(--texte); font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif; font-size: 16px; line-height: 1.5; }
+main { max-width: 860px; margin: 0 auto; padding: 28px 18px 32px; display: grid; gap: 18px; }
+h1 { margin: 0; font-size: 1.6rem; line-height: 1.2; }
+h2 { margin: 0 0 12px; font-size: 1.1rem; }
+p { margin: 0; }
+.intro { margin-top: -10px; color: var(--discret); }
+.carte { background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 18px; }
+.depot { position: relative; display: grid; gap: 2px; justify-items: center; padding: 18px; border: 2px dashed var(--trait); border-radius: 10px; cursor: pointer; text-align: center; }
+.depot.survol { border-color: var(--accent); background: var(--accent-clair); }
+.depot span { color: var(--discret); font-size: 0.88rem; }
+.depot input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.depot:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+.discret { color: var(--discret); font-size: 0.9rem; }
+.fichiers { margin: 10px 0 0; padding-left: 20px; font-size: 0.92rem; }
+details { margin-top: 12px; font-size: 0.92rem; }
+summary { cursor: pointer; color: var(--discret); }
+details > :not(summary) { margin-top: 8px; }
+details ul { padding-left: 20px; }
+button { font: inherit; font-size: 0.9rem; padding: 7px 12px; border: 1px solid var(--trait); border-radius: 8px; background: var(--carte); color: var(--texte); cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+button.lien { border: 0; padding: 0; background: none; color: var(--accent); text-decoration: underline; }
+button.danger { color: var(--erreur); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 10px; }
+textarea, input[type="text"], select { width: 100%; font: inherit; font-size: 0.92rem; padding: 7px 9px; border: 1px solid var(--trait); border-radius: 8px; background: #fff; color: var(--texte); }
+textarea { min-height: 90px; resize: vertical; }
+.mono { font-family: Consolas, Menlo, monospace; font-size: 0.84rem; }
+label.champ, p.champ { display: block; margin: 12px 0 4px; font-size: 0.86rem; font-weight: 700; }
+.modele { border-collapse: collapse; font-size: 0.84rem; }
+.modele th, .modele td { border: 1px solid var(--trait); padding: 3px 8px; text-align: left; }
+.modele th { background: var(--fond); }
+.filtre { font-size: 0.9rem; color: var(--discret); }
+.questions { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.question { border: 1px solid var(--trait); border-radius: 10px; padding: 12px 14px; }
+.question.a-verifier { border-color: #e2b46a; }
+.question.edition { border-color: var(--accent); }
+.entete { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.etiquettes { display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.78rem; }
+.etiquette { padding: 1px 7px; border-radius: 6px; background: var(--fond); font-weight: 700; }
+.etiquette.ok { color: var(--ok); background: var(--ok-clair); }
+.etiquette.alerte { color: var(--alerte); background: var(--alerte-clair); }
+.enonce { margin: 8px 0 6px; font-weight: 700; white-space: pre-wrap; overflow-wrap: anywhere; }
+.propositions { list-style: none; margin: 0; padding: 0; font-size: 0.92rem; }
+.propositions li { display: flex; gap: 8px; overflow-wrap: anywhere; }
+.propositions li.juste { color: var(--ok); font-weight: 700; }
+.probleme { margin-top: 6px; font-size: 0.86rem; color: var(--erreur); }
+.source { margin-top: 6px; font-size: 0.78rem; color: var(--discret); overflow-wrap: anywhere; }
+.statut { margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--alerte-clair); font-size: 0.86rem; }
+.choix { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.choix b { flex: none; width: 1.2em; text-align: center; }
+.choix input[type="checkbox"] { flex: none; width: 18px; height: 18px; accent-color: var(--ok); }
+.choix button { flex: none; }
+.vide { color: var(--discret); font-size: 0.92rem; }
+#etatExport { margin-top: 14px; font-weight: 700; }
+#etatExport.ok { color: var(--ok); }
+#etatExport.alerte { color: var(--alerte); }
+footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>QCM Studio</h1>
+  <p class="intro">Convertit des QRU et des QRM venant de Word, d'Excel, de Moodle ou d'un fichier QTI en une archive à importer dans Uness Evaluation Studio.</p>
+
+  <section class="carte">
+    <h2>1. Importer les questions</h2>
+    <label class="depot" id="depot" for="fichiers">
+      <strong>Déposer les fichiers ici, ou cliquer pour les choisir</strong>
+      <span>Word .docx, Excel .xlsx, CSV, texte .txt, Moodle XML, QTI .xml ou .zip</span>
+      <input type="file" id="fichiers" multiple accept=".docx,.xlsx,.csv,.txt,.xml,.zip">
+    </label>
+    <ul class="fichiers" id="fichiersLus"></ul>
+    <details id="messages" hidden></details>
+    <details>
+      <summary>Coller des questions sous forme de texte</summary>
+      <textarea id="texte" class="mono" spellcheck="false" placeholder="QRU : Quel examen permet d'évaluer la denture ?&#10;A : La radiographie panoramique *&#10;B : Une photographie du profil&#10;C : Un examen sanguin"></textarea>
+      <div class="actions"><button type="button" id="ajouterTexte">Ajouter ces questions</button></div>
+    </details>
+    <details>
+      <summary>Modèle de tableau Excel</summary>
+      <table class="modele">
+        <tr><th>Type</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>Bonnes réponses</th></tr>
+        <tr><td>QRU</td><td>Question 1 ?</td><td>Choix A</td><td>Choix B</td><td>Choix C</td><td>B</td></tr>
+        <tr><td>QRM</td><td>Question 2 ?</td><td>Choix A</td><td>Choix B</td><td>Choix C</td><td>A, C</td></tr>
+      </table>
+      <p class="discret">Une ligne par question, jusqu'à huit propositions (colonnes A à H). Le classeur peut contenir plusieurs feuilles.</p>
+    </details>
+    <p class="discret" style="margin-top: 12px"><button type="button" class="lien" id="exemple">Essayer avec un exemple</button></p>
+  </section>
+
+  <section class="carte">
+    <h2>2. Vérifier les questions</h2>
+    <p id="bilan">Aucune question pour l'instant.</p>
+    <div class="actions" id="outils" hidden>
+      <button type="button" class="principal" id="toutAccepter" hidden></button>
+      <label class="filtre" id="filtreLabel" hidden><input type="checkbox" id="filtre"> N'afficher que les questions à vérifier</label>
+      <button type="button" class="danger" id="toutEffacer">Tout effacer</button>
+    </div>
+    <ol class="questions" id="liste"></ol>
+  </section>
+
+  <section class="carte">
+    <h2>3. Exporter</h2>
+    <label class="champ" for="titre">Titre de la banque</label>
+    <input type="text" id="titre" value="Banque de QCM">
+    <label class="champ" for="identifiant">Identifiant</label>
+    <input type="text" id="identifiant" value="TEST_001">
+    <label class="champ" for="consignes">Consignes aux étudiants (facultatif)</label>
+    <textarea id="consignes"></textarea>
+    <p id="etatExport">Importez des questions pour activer l'export.</p>
+    <div class="actions">
+      <button type="button" class="principal" id="exportQTI" disabled>Télécharger l'archive QTI (.zip)</button>
+      <button type="button" id="exportTXT" disabled>Texte (.txt)</button>
+      <button type="button" id="exportCSV" disabled>Tableau de vérification (.csv)</button>
+    </div>
+    <p class="discret" style="margin-top: 10px">Dans Uness Evaluation Studio : «&nbsp;Import QTI&nbsp;», puis déposer l'archive .zip.</p>
+    <details>
+      <summary>Voir le texte des questions</summary>
+      <textarea id="texteNormalise" class="mono" readonly spellcheck="false"></textarea>
+      <div class="actions"><button type="button" id="copier">Copier</button></div>
+    </details>
+  </section>
+
+  <footer>© 2026 Anaïs Cavaré · Licence MIT · Outil indépendant, sans lien avec l'UNESS · Aucune donnée n'est envoyée</footer>
+</main>
+<script>
+"use strict";
+/*
+  QCM Studio
+  Convertit des QRU et des QRM (Word, Excel, CSV, texte, Moodle XML, QTI)
+  en archive QTI 2.1 pour Uness Evaluation Studio.
+  Tout se passe dans le navigateur : aucun fichier n'est envoyé.
+*/
+const $ = (id) => document.getElementById(id);
+const alpha = "ABCDEFGH";
+
+/* ---------- Outils ---------- */
+
+function esc(s) {
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
+  );
+}
+function xe(s) {
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c],
+  );
+}
+function elText(el) {
+  return el
+    ? String(el.textContent || "")
+        .replace(/\s+/g, " ")
+        .trim()
+    : "";
+}
+function all(root, name) {
+  return [...root.getElementsByTagName("*")].filter(
+    (n) => n.localName === name || n.localName === name.replace(/^qti-/, ""),
+  );
+}
+function child(root, name) {
+  return root ? [...root.children].find((n) => n.localName === name || n.localName === "qti-" + name) : null;
+}
+function desc(root, name) {
+  return root ? all(root, name)[0] : null;
+}
+function norm(s) {
+  return String(s || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+function clean(s) {
+  return String(s || "")
+    .replace(/\u00a0/g, " ")
+    .replace(/\r/g, "")
+    .trim();
+}
+function textHtml(s) {
+  const doc = new DOMParser().parseFromString(String(s || ""), "text/html");
+  return clean((doc.body.textContent || "").replace(/\s+/g, " "));
+}
+function xmlParse(s) {
+  const d = new DOMParser().parseFromString(String(s).replace(/^\ufeff/, ""), "application/xml");
+  if (d.getElementsByTagName("parsererror").length) throw Error("XML mal formé");
+  return d;
+}
+
+/* ---------- Questions et contrôles ---------- */
+
+function question(text, type, choices, source = "Saisie", meta = {}) {
+  const cleanChoices = choices.map((c) => ({ text: clean(c.text), correct: !!c.correct }));
+  const n = cleanChoices.filter((c) => c.correct).length;
+  return {
+    text: clean(text),
+    type: type === "multiple" ? "multiple" : "single",
+    choices: cleanChoices,
+    source,
+    correctionStatus: meta.correctionStatus || (n ? "confirmed" : "missing"),
+    typeNeedsReview: !!meta.typeNeedsReview,
+    correctionDetail: meta.correctionDetail || "",
+    notes: meta.notes || [],
+  };
+}
+function warnings(q) {
+  const a = [];
+  if (!q.text) a.push("Énoncé manquant");
+  if (q.choices.length < 2) a.push("Moins de deux propositions");
+  if (q.choices.length > 8) a.push("Plus de huit propositions (limite de cet export)");
+  if (q.choices.some((c) => !c.text)) a.push("Proposition vide");
+  const n = q.choices.filter((c) => c.correct).length;
+  if (!n) a.push("Bonne(s) réponse(s) à renseigner");
+  if (q.type === "single" && n !== 1) a.push("QRU : exactement une bonne réponse attendue");
+  if (q.correctionStatus === "missing") a.push("Corrigé non fourni par le fichier source");
+  if (q.correctionStatus === "review")
+    a.push("Corrigé à confirmer : " + (q.correctionDetail || "notation non standard"));
+  if (q.typeNeedsReview) a.push("Type QRU/QRM à confirmer");
+  return a;
+}
+// Seules les questions complètes avec une correction déjà cochée peuvent être confirmées en lot.
+// Une réponse absente, une question structurellement invalide ou une QRU avec plusieurs
+// réponses exactes ne peuvent jamais être approuvées automatiquement.
+function bulkAcceptable(q) {
+  const n = q.choices.filter((c) => c.correct).length;
+  return (
+    !!q.text &&
+    q.choices.length >= 2 &&
+    q.choices.length <= 8 &&
+    q.choices.every((c) => !!c.text) &&
+    n > 0 &&
+    (q.type !== "single" || n === 1) &&
+    (q.correctionStatus === "review" || q.typeNeedsReview)
+  );
+}
+
+/* ---------- Lecture des formats de questions ---------- */
+
+function parseText(raw, source = "Texte") {
+  const lines = String(raw).replace(/\r/g, "").split("\n").map(clean),
+    qs = [],
+    warn = [];
+  let cur = null,
+    last = null,
+    orphan = 0;
+  function push() {
+    if (cur) {
+      if (cur.typeNeedsReview && cur.correctionStatus === "confirmed") {
+        const n = cur.choices.filter((c) => c.correct).length;
+        if (n) {
+          cur.type = n > 1 ? "multiple" : "single";
+          cur.typeNeedsReview = false;
+        }
+      }
+      qs.push(cur);
+      cur = null;
+      last = null;
+    }
+  }
+  function make(text, type, explicit) {
+    push();
+    cur = question(text, type || "single", [], source, {
+      correctionStatus: "missing",
+      typeNeedsReview: !explicit,
+    });
+  }
+  function opt(line) {
+    let m = line.match(/^\s*(?:[-•]\s*)?([A-Ha-h]|[1-8])\s*[):.\-–]\s*(.+)$/);
+    if (!m) m = line.match(/^\s*([-•])\s+(.+)$/);
+    if (!m) return null;
+    const key = m[1];
+    if (/^\d$/.test(key) && (!cur || (!cur.choices.length && line.includes("?")))) return null;
+    return m[2];
+  }
+  function finalizeKey(key) {
+    if (!cur) return;
+    const tokens =
+      String(key)
+        .toUpperCase()
+        .match(/\b[A-H]\b|\b[1-8]\b/g) || [];
+    const ids = new Set(tokens.map((t) => (/^\d$/.test(t) ? alpha[Number(t) - 1] : t)));
+    if (!ids.size) {
+      warn.push("Clé de correction textuelle non interprétée : " + key);
+      return;
+    }
+    cur.choices.forEach((c, j) => (c.correct = ids.has(alpha[j])));
+    cur.correctionStatus = "confirmed";
+  }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line) continue;
+    const explicit = line.match(/^\s*(?:\d+\s*[.\-)]+\s*)?(QRU|QRM|QCU|QCM)\s*[:.\-–]\s*(.*)$/i);
+    if (explicit) {
+      const type = /QRM|QCM/i.test(explicit[1]) ? "multiple" : "single";
+      make(explicit[2], type, true);
+      continue;
+    }
+    const anskey = line.match(
+      /^\s*(?:bonnes?\s+r[eé]ponses?|r[eé]ponses?\s+(?:correctes?|exactes?)|correction|solution|correct\s+answers?|answer\s+key|r[eé]ponses?\s+attendues?)\s*[:=\-]\s*(.+)$/i,
+    );
+    if (anskey && cur) {
+      finalizeKey(anskey[1]);
+      last = null;
+      continue;
+    }
+    const numbered = line.match(/^\s*(?:question\s*)?(?:Q\s*)?(\d+)\s*[.):\-]\s*(.+)$/i);
+    const currentChoices = cur?.choices.length || 0;
+    if (numbered && (!cur || currentChoices >= 2 || !/^\d\s*[).]/.test(line))) {
+      make(numbered[2], null, false);
+      continue;
+    }
+    const option = opt(line);
+    if (option && cur) {
+      let t = option;
+      const right = /(?:\s*\*|\s*[✓✔✅☑]|\s*\[x\])\s*$/i.test(t) || /^\s*[✓✔✅☑]\s*/.test(t);
+      t = t
+        .replace(/(?:\s*\*|\s*[✓✔✅☑]|\s*\[x\])\s*$/i, "")
+        .replace(/^\s*[✓✔✅☑]\s*/, "")
+        .trim();
+      const c = { text: t, correct: right };
+      cur.choices.push(c);
+      last = c;
+      if (right) {
+        cur.correctionStatus = "confirmed";
+      }
+      continue;
+    }
+    const nextLines = lines.slice(i + 1, i + 4).filter(Boolean);
+    const followedByChoices = nextLines.some((x) => /^\s*(?:[A-Ha-h]|[1-8])\s*[):.\-–]\s+/.test(x));
+    const mayBeQuestion = followedByChoices && (!cur || cur.choices.length >= 2);
+    if (mayBeQuestion) {
+      make(line.replace(/^\s*(?:question\s*)?(?:Q\s*)?\d+\s*[-.):]\s*/i, ""), null, false);
+      continue;
+    }
+    if (cur) {
+      if (last) last.text += " " + line;
+      else cur.text += " " + line;
+    } else orphan++;
+  }
+  push();
+  if (orphan) warn.push(`${orphan} ligne(s) hors questions non intégrée(s)`);
+  if (!qs.length)
+    warn.push("Aucun QCM structuré identifiable. Utilisez un intitulé suivi de propositions A), B), etc.");
+  return { questions: qs, warnings: warn };
+}
+function parseWord(doc) {
+  let p = all(doc, "p"),
+    lines = [];
+  for (const node of p) {
+    if (!node.namespaceURI || !node.namespaceURI.includes("wordprocessingml")) continue;
+    let text = "";
+    const walk = (n) => {
+      for (const c of n.childNodes) {
+        if (c.nodeType !== 1) continue;
+        if (["t", "instrText"].includes(c.localName) && c.namespaceURI?.includes("wordprocessingml"))
+          text += c.textContent;
+        else if (["tab", "br", "cr"].includes(c.localName)) text += " ";
+        else if (["drawing", "object", "pict"].includes(c.localName)) {
+          /* images : signalées à part */
+        } else walk(c);
+      }
+    };
+    walk(node);
+    lines.push(text);
+  }
+  return lines.join("\n");
+}
+function parseMoodle(root, source) {
+  const out = [],
+    warn = [];
+  const questions = [...root.getElementsByTagName("question")];
+  for (const q of questions) {
+    const type = q.getAttribute("type");
+    if (type === "category") continue;
+    if (type !== "multichoice") {
+      warn.push("Question Moodle de type " + type + " ignorée (seules QRU/QRM sont prises en charge)");
+      continue;
+    }
+    let stem = elText(child(child(q, "questiontext"), "text")) || elText(desc(q, "questiontext"));
+    if (/<\s*(img|video|math|iframe)\b/i.test(stem)) {
+      warn.push("Question avec média ignorée : " + stem.slice(0, 50));
+      continue;
+    }
+    stem = textHtml(stem);
+    const single = elText(child(q, "single")).toLowerCase();
+    let choices = [],
+      fractions = [];
+    for (const a of [...q.children].filter((n) => n.localName === "answer")) {
+      const value = Number(a.getAttribute("fraction") || 0);
+      let t = elText(child(a, "text"));
+      if (/<\s*(img|video|math|iframe)\b/i.test(t)) {
+        choices = [];
+        warn.push("Réponse contenant un média ignorée");
+        break;
+      }
+      choices.push({ text: textHtml(t), correct: value > 0 });
+      fractions.push(value);
+    }
+    if (!choices.length) continue;
+    const inferred = choices.filter((c) => c.correct).length;
+    const t =
+      single === "true" ? "single" : single === "false" ? "multiple" : inferred > 1 ? "multiple" : "single";
+    const partial = fractions.some((f) => f !== 0 && f !== 100) || fractions.some((f) => f < 0);
+    const hasPositive = fractions.some((f) => f > 0);
+    out.push(
+      question(stem, t, choices, source, {
+        correctionStatus: partial ? "review" : hasPositive ? "confirmed" : "missing",
+        correctionDetail: partial ? "fractions/penalités Moodle non conservées" : "",
+        typeNeedsReview: !["true", "false"].includes(single) && !hasPositive,
+      }),
+    );
+    if (partial)
+      warn.push("Barème Moodle fractionnaire ou négatif : valider les réponses retenues avant export");
+  }
+  return { questions: out, warnings: [...new Set(warn)] };
+}
+function containsMedia(n) {
+  return (
+    all(n, "img").length > 0 ||
+    all(n, "math").length > 0 ||
+    all(n, "object").length > 0 ||
+    all(n, "image").length > 0 ||
+    all(n, "video").length > 0
+  );
+}
+function parseQTI2(doc, source) {
+  const out = [],
+    warn = [];
+  const entries = [...doc.getElementsByTagName("*")];
+  const items = entries.filter((n) => ["assessmentItem", "qti-assessment-item"].includes(n.localName));
+  for (const item of items) {
+    const interactions = entriesIn(item, ["choiceInteraction", "qti-choice-interaction"]);
+    if (interactions.length !== 1) {
+      warn.push("Item QTI ignoré : nombre d’interactions de choix différent de 1");
+      continue;
+    }
+    if (containsMedia(item)) {
+      warn.push("Item QTI ignoré : média ou équation non pris en charge");
+      continue;
+    }
+    const interaction = interactions[0];
+    const choiceNodes = [...interaction.children].filter((n) =>
+      ["simpleChoice", "qti-simple-choice"].includes(n.localName),
+    );
+    if (choiceNodes.length < 2) {
+      warn.push("Item QTI ignoré : propositions insuffisantes");
+      continue;
+    }
+    const prompt = entriesIn(interaction, ["prompt", "qti-prompt"])[0];
+    const body = entriesIn(item, ["itemBody", "qti-item-body"])[0];
+    const stem = elText(prompt) || elText(body);
+    const responseId =
+      interaction.getAttribute("responseIdentifier") ||
+      interaction.getAttribute("response-identifier") ||
+      "RESPONSE";
+    const decl = entriesIn(item, ["responseDeclaration", "qti-response-declaration"]).find(
+      (n) => n.getAttribute("identifier") === responseId,
+    );
+    const correctNode = decl ? entriesIn(decl, ["correctResponse", "qti-correct-response"])[0] : null;
+    const correctValues = correctNode
+      ? entriesIn(correctNode, ["value", "qti-value"]).map(elText).filter(Boolean)
+      : [];
+    const ids = choiceNodes.map((c) => c.getAttribute("identifier") || "");
+    const valuesValid = correctValues.every((v) => ids.includes(v));
+    const matching = new Set(correctValues.filter((v) => ids.includes(v)));
+    // IMPORTANT : en QTI 2.x, un mapping (mapEntry mappedValue>0) représente
+    // des points, pas une correction. Certaines exports affectent des points à
+    // toutes les propositions : ne JAMAIS les marquer toutes justes par ce biais.
+    const mapping = decl ? entriesIn(decl, ["mapping", "qti-mapping"])[0] : null;
+    const processing = entriesIn(item, ["responseProcessing", "qti-response-processing"])[0];
+    const choices = choiceNodes.map((c) => ({
+      text: elText(c),
+      correct: matching.has(c.getAttribute("identifier") || ""),
+    }));
+    const cardinality = (decl?.getAttribute("cardinality") || "").toLowerCase();
+    const max = interaction.getAttribute("maxChoices") || interaction.getAttribute("max-choices") || "";
+    const type =
+      cardinality === "multiple"
+        ? "multiple"
+        : cardinality === "single"
+          ? "single"
+          : correctValues.length > 1 || (max && Number(max) !== 1)
+            ? "multiple"
+            : "single";
+    let status = "confirmed",
+      detail = "";
+    if (!correctValues.length) {
+      status = "missing";
+      detail = mapping
+        ? "Seules des valeurs de score QTI sont présentes : elles ne définissent pas les bonnes réponses."
+        : processing
+          ? "Corrigé absent de correctResponse ; règles de notation QTI non interprétables sans risque."
+          : "Aucun corrigé explicite dans le QTI.";
+      warn.push("QTI sans correctResponse : aucune bonne réponse n’a été déduite des scores.");
+    } else if (!valuesValid) {
+      status = "review";
+      detail = "Identifiants du corrigé absents de la liste des propositions.";
+    } else if (mapping) {
+      status = "review";
+      detail = "Bonnes réponses lues depuis correctResponse ; barème QTI détaillé non conservé.";
+    }
+    if (correctValues.length === ids.length && ids.length > 1) {
+      status = "review";
+      detail =
+        "Le QTI source désigne toutes les propositions comme correctes ; vérifier le corrigé original.";
+    }
+    if (type === "single" && matching.size > 1) {
+      status = "review";
+      detail = "Le QTI annonce une QRU avec plusieurs réponses correctes.";
+    }
+    out.push(
+      question(stem, type, choices, source, {
+        correctionStatus: status,
+        correctionDetail: detail,
+        typeNeedsReview: !cardinality && !max && !correctValues.length,
+      }),
+    );
+  }
+  return { questions: out, warnings: [...new Set(warn)] };
+}
+function entriesIn(root, names) {
+  return root ? [...root.getElementsByTagName("*")].filter((n) => names.includes(n.localName)) : [];
+}
+// QTI 1.2 : lire les conditions logiques au lieu d'interpréter chaque varequal
+// comme une réponse correcte. Exemple QuizWizard : <and><not><varequal>FAUX...
+// puis <varequal>JUSTE</varequal></and>. La présence de tous les identifiants
+// sous ces conditions est indispensable pour retrouver un corrigé exact.
+function qti1ExactKey(condition, optionIds, responseId) {
+  if (!condition) return null;
+  const root = [...condition.children].filter((n) => n.nodeType === 1);
+  if (root.length !== 1) return null;
+  const expression = root[0];
+  const terms = expression.localName === "and" ? [...expression.children] : [expression];
+  if (!terms.length) return null;
+  const seen = new Map();
+  for (const term of terms) {
+    let positive = true,
+      v = term;
+    if (v.localName === "not") {
+      const inner = [...v.children].filter((n) => n.nodeType === 1);
+      if (inner.length !== 1) return null;
+      v = inner[0];
+      positive = false;
+    }
+    if (v.localName !== "varequal") return null;
+    if (v.hasAttribute("respident") && v.getAttribute("respident") !== responseId) return null;
+    const id = elText(v);
+    if (!optionIds.includes(id) || seen.has(id)) return null;
+    seen.set(id, positive);
+  }
+  // S'il manque une contrainte, plusieurs jeux de réponses peuvent satisfaire
+  // la règle de score : aucun corrigé certain ne peut être établi.
+  if (seen.size !== optionIds.length) return null;
+  const positives = optionIds.filter((id) => seen.get(id) === true);
+  return positives.length ? positives : null;
+}
+function parseQTI1(doc, source) {
+  const out = [],
+    warn = [];
+  const items = [...doc.getElementsByTagName("*")].filter((n) => n.localName === "item");
+  for (const item of items) {
+    const pres = desc(item, "presentation"),
+      response = desc(pres, "response_lid");
+    const optionsNodes = response
+      ? [...response.getElementsByTagName("*")].filter((n) => n.localName === "response_label")
+      : [];
+    if (!response || optionsNodes.length < 2) {
+      warn.push("Un item QTI 1.x non-QCM a été ignoré");
+      continue;
+    }
+    if (containsMedia(item)) {
+      warn.push("Une question QTI 1.x avec média a été ignorée");
+      continue;
+    }
+    const stem = textHtml(
+      elText(child(child(pres, "material"), "mattext")) || elText(desc(pres, "material")),
+    );
+    const ids = optionsNodes.map((n) => n.getAttribute("ident") || "");
+    const responseId = response.getAttribute("ident") || "response1";
+    const conditions = all(item, "respcondition");
+    const exactKeys = [];
+    let nonExact = false,
+      hasScoring = false;
+    for (const cond of conditions) {
+      const score = desc(cond, "setvar");
+      if (!score) continue;
+      hasScoring = true;
+      const action = (score.getAttribute("action") || "Set").toLowerCase();
+      const value = Number(elText(score));
+      if (!Number.isFinite(value)) {
+        nonExact = true;
+        continue;
+      }
+      if (value <= 0) {
+        if (value < 0) nonExact = true;
+        continue;
+      }
+      if (action !== "set") {
+        nonExact = true;
+        continue;
+      }
+      const key = qti1ExactKey(desc(cond, "conditionvar"), ids, responseId);
+      if (key) exactKeys.push(key);
+      else nonExact = true;
+    }
+    const isCertain = exactKeys.length === 1 && !nonExact;
+    const good = isCertain ? new Set(exactKeys[0]) : new Set();
+    const choices = optionsNodes.map((n) => ({
+      text: textHtml(elText(desc(n, "mattext") || desc(n, "material") || n)),
+      correct: good.has(n.getAttribute("ident")),
+    }));
+    // Certaines banques étiquettent toutes les questions "Multiple" même lorsque
+    // le corrigé n'autorise qu'une seule sélection. Dériver QRU/QRM du corrigé exact.
+    const declared = (response.getAttribute("rcardinality") || "").toLowerCase();
+    const type = isCertain
+      ? good.size > 1
+        ? "multiple"
+        : "single"
+      : declared === "single"
+        ? "single"
+        : "multiple";
+    let status = isCertain ? "confirmed" : "missing";
+    let detail = "";
+    if (!isCertain) {
+      detail = hasScoring
+        ? "Conditions de score QTI 1.x non univoques : indiquer les bonnes réponses manuellement."
+        : "Corrigé non présent dans le fichier QTI 1.x.";
+      warn.push("QTI 1.x : corrigé non déductible de façon certaine pour au moins une question.");
+    }
+    out.push(
+      question(stem, type, choices, source, {
+        correctionStatus: status,
+        correctionDetail: detail,
+        typeNeedsReview: !isCertain && declared !== "single",
+      }),
+    );
+  }
+  return { questions: out, warnings: [...new Set(warn)] };
+}
+function parseXMLString(s, source) {
+  const doc = xmlParse(s),
+    root = doc.documentElement;
+  switch (root.localName) {
+    case "quiz":
+      return parseMoodle(doc, source);
+    case "assessmentItem":
+    case "qti-assessment-item":
+      return parseQTI2(doc, source);
+    case "questestinterop":
+    case "item":
+    case "assessment":
+    case "section":
+      return parseQTI1(doc, source);
+    default: {
+      const qti = parseQTI2(doc, source);
+      if (qti.questions.length) return qti;
+      const old = parseQTI1(doc, source);
+      if (old.questions.length) return old;
+      return { questions: [], warnings: ["XML non reconnu comme banque Moodle ou question QTI"] };
+    }
+  }
+}
+function xlsxCellValue(cell, shared) {
+  const type = cell.getAttribute("t");
+  if (type === "inlineStr") return elText(desc(cell, "is"));
+  let v = elText(child(cell, "v"));
+  if (type === "s") return shared[Number(v)] ?? v;
+  if (type === "b") return v === "1" ? "TRUE" : "FALSE";
+  return v;
+}
+function rowsFromSheet(doc, shared) {
+  const out = [];
+  const sheet = desc(doc, "sheetData");
+  if (!sheet) return out;
+  for (const r of [...sheet.children].filter((n) => n.localName === "row")) {
+    let vals = [];
+    for (const c of [...r.children].filter((n) => n.localName === "c")) {
+      const ref = c.getAttribute("r") || "";
+      let col = ref.match(/^[A-Z]+/i)?.[0]?.toUpperCase() || "";
+      let idx = 0;
+      for (const z of col) idx = idx * 26 + z.charCodeAt(0) - 64;
+      idx = (idx || vals.length + 1) - 1;
+      vals[idx] = xlsxCellValue(c, shared);
+    }
+    if (vals.some((v) => clean(v))) out.push(vals.map((v) => v ?? ""));
+  }
+  return out;
+}
+function parseSpreadsheet(rows, source) {
+  if (!rows.length) return { questions: [], warnings: ["Feuille Excel vide"] };
+
+  // Export Wooclap/QuizWizard à colonnes variables :
+  // "Type of question | Question | Answer | Content | (autres réponses...)".
+  // La colonne Answer fournit l'indice 1-based des choix corrects, pas un score.
+  const quizHeaders = rows.map((r) => r.map(norm));
+  const quizHead = quizHeaders.findIndex(
+    (h) => h.includes("question") && h.includes("answer") && h.includes("content"),
+  );
+  if (quizHead >= 0) {
+    const header = quizHeaders[quizHead],
+      stemIdx = header.indexOf("question"),
+      keyIdx = header.indexOf("answer"),
+      contentIdx = header.indexOf("content"),
+      typeIdx = header.findIndex((v) =>
+        ["typeofquestion", "typequestion", "questiontype", "type"].includes(v),
+      );
+    if (contentIdx > stemIdx && contentIdx > keyIdx) {
+      const out = [],
+        warn = [];
+      for (let r = quizHead + 1; r < rows.length; r++) {
+        const line = rows[r],
+          stem = clean(line[stemIdx]);
+        if (!stem) continue;
+        const raw = clean(line[keyIdx]);
+        const choices = [];
+        for (let j = contentIdx; j < line.length && choices.length < 8; j++) {
+          const t = clean(line[j]);
+          if (t) choices.push({ text: t, correct: false });
+        }
+        if (choices.length < 2) {
+          warn.push(`Ligne ${r + 1} : moins de deux réponses`);
+          continue;
+        }
+        const tokens = raw
+          .toUpperCase()
+          .split(/[,;|/&+\s]+/)
+          .map((t) => t.trim())
+          .filter(Boolean);
+        const selected = [];
+        let valid = !!tokens.length;
+        for (const token of tokens) {
+          let id = -1;
+          if (/^[A-H]$/.test(token)) id = token.charCodeAt(0) - 65;
+          else if (/^[1-8]$/.test(token)) id = Number(token) - 1;
+          else {
+            valid = false;
+            break;
+          }
+          if (id >= choices.length || selected.includes(id)) {
+            valid = false;
+            break;
+          }
+          selected.push(id);
+        }
+        // Pour une réponse exprimée sous forme de texte, accepter uniquement
+        // une correspondance exacte et unique avec le libellé d'une proposition.
+        if (!valid && raw) {
+          const matches = choices.map((c, i) => (norm(c.text) === norm(raw) ? i : -1)).filter((i) => i >= 0);
+          if (matches.length === 1) {
+            selected.splice(0, selected.length, matches[0]);
+            valid = true;
+          }
+        }
+        if (valid) for (const j of selected) choices[j].correct = true;
+        const type = valid
+          ? selected.length > 1
+            ? "multiple"
+            : "single"
+          : typeIdx >= 0 && /qrm|multiple/.test(norm(line[typeIdx]))
+            ? "multiple"
+            : "single";
+        out.push(
+          question(stem, type, choices, source, {
+            correctionStatus: valid ? "confirmed" : "missing",
+            correctionDetail: valid
+              ? ""
+              : raw
+                ? `Réponse source non interprétée : ${raw}`
+                : "Clé de correction absente",
+            typeNeedsReview: !valid,
+          }),
+        );
+        if (!valid) warn.push(`Ligne ${r + 1} : corrigé non interprétable (${raw || "vide"}).`);
+      }
+      if (out.length) return { questions: out, warnings: warn };
+    }
+  }
+  const normRows = rows.map((row) => row.map(norm));
+  const stemNames = [
+    "question",
+    "enonce",
+    "intitule",
+    "stem",
+    "textequestion",
+    "questiontext",
+    "questiontitle",
+    "title",
+    "titre",
+    "statement",
+    "questionname",
+    "name",
+  ];
+  const correctNames = [
+    "bonnesreponses",
+    "bonnereponse",
+    "reponsecorrecte",
+    "reponsescorrectes",
+    "correct",
+    "correctanswer",
+    "correctanswers",
+    "reponsesexactes",
+    "solution",
+    "solutions",
+    "answer",
+    "answers",
+    "correctchoice",
+    "correctchoices",
+    "rightanswers",
+    "reponsejuste",
+  ];
+  const choiceHeader = (n) =>
+    /^(?:[a-h]|(?:choix|choice|reponse|option|answer|proposition)(?:[a-h]|[1-8])?|possibleanswer[1-8]?)$/.test(
+      n,
+    );
+  const headIdx = normRows.findIndex((row) => {
+    const hasStem = row.some((n) => stemNames.includes(n));
+    const hasChoices = row.filter(choiceHeader).length >= 2;
+    return hasStem && (hasChoices || row.some((n) => correctNames.includes(n)));
+  });
+  if (headIdx < 0) {
+    // Fichiers présentés verticalement, notamment avec une question et ses réponses
+    // réparties sur des lignes, plutôt qu'une ligne par question.
+    const text = rows.map((row) => row.map(clean).filter(Boolean).join(" ")).join("\n");
+    const parsed = parseText(text, source);
+    if (parsed.questions.length) return parsed;
+    return {
+      questions: [],
+      warnings: [
+        "Tableau Excel non reconnu. En-têtes détectés : " +
+          rows
+            .slice(0, 3)
+            .map((r) => r.map(clean).filter(Boolean).slice(0, 9).join(" | "))
+            .join(" / ")
+            .slice(0, 250),
+      ],
+    };
+  }
+  const headers = normRows[headIdx];
+  const stemCol = headers.findIndex((n) => stemNames.includes(n));
+  const typeCol = headers.findIndex((n) =>
+    ["type", "typequestion", "questiontype", "format", "nature", "kind"].includes(n),
+  );
+  const correctCol = headers.findIndex((n) => correctNames.includes(n));
+  const choiceIndices = [],
+    choiceFlagIndices = [];
+  // Format Wooclap natif : Type | Title | Correct | Choice | Choice | Choice...
+  // et formats étiquetés A, B, C ou Choice1, Choice2, ...
+  for (let j = 0; j < 8; j++) {
+    const l = alpha[j].toLowerCase(),
+      k = j + 1;
+    const candidates = [
+      l,
+      "choix" + l,
+      "reponse" + l,
+      "proposition" + l,
+      "option" + l,
+      "answer" + l,
+      "choix" + k,
+      "choice" + k,
+      "reponse" + k,
+      "proposition" + k,
+      "option" + k,
+      "answer" + k,
+      "possibleanswer" + k,
+    ];
+    choiceIndices[j] = headers.findIndex((n) => candidates.includes(n));
+    choiceFlagIndices[j] = headers.findIndex((n) =>
+      [
+        "correct" + l,
+        "iscorrect" + l,
+        "bonne" + l,
+        "reponse" + l + "correcte",
+        "iscorrect" + k,
+        "correct" + k,
+        "correctchoice" + k,
+        "bonne" + k,
+      ].includes(n),
+    );
+  }
+  const used = new Set(choiceIndices.filter((i) => i >= 0));
+  const repeated = headers
+    .map((n, i) => (["choice", "choix", "option", "reponse", "proposition", "answer"].includes(n) ? i : -1))
+    .filter((i) => i >= 0);
+  for (let j = 0; j < 8; j++)
+    if (choiceIndices[j] < 0) {
+      const idx = repeated.find((i) => !used.has(i));
+      if (idx >= 0) {
+        choiceIndices[j] = idx;
+        used.add(idx);
+      }
+    }
+  if (choiceIndices.filter((i) => i >= 0).length < 2) {
+    return {
+      questions: [],
+      warnings: [
+        "Colonne de réponses insuffisantes. En-têtes : " + rows[headIdx].map(clean).join(" | ").slice(0, 250),
+      ],
+    };
+  }
+  const out = [],
+    warn = [];
+  const keyTokens = (s) =>
+    String(s)
+      .toUpperCase()
+      .split(/[,;|/\s]+/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  for (let r = headIdx + 1; r < rows.length; r++) {
+    const row = rows[r],
+      stem = clean(row[stemCol]);
+    if (!stem) continue;
+    let tag = typeCol >= 0 ? norm(row[typeCol]) : "";
+    if (
+      tag &&
+      ![
+        "qru",
+        "qrm",
+        "mcq",
+        "multiplechoice",
+        "multiplechoicequestion",
+        "singlechoice",
+        "singlechoicequestion",
+        "choixmultiple",
+        "choixunique",
+        "multi",
+        "single",
+        "multiple",
+      ].includes(tag)
+    ) {
+      warn.push(`Ligne ${r + 1} : type ${clean(row[typeCol])} non pris en charge`);
+      continue;
+    }
+    const key = correctCol >= 0 ? clean(row[correctCol]) : "";
+    const tokens = keyTokens(key);
+    const selected = new Set(
+      tokens.flatMap((tok) => {
+        const m = tok.match(/^[A-H]$/);
+        if (m) return [tok];
+        if (/^[1-8]$/.test(tok)) return [alpha[Number(tok) - 1]];
+        return [];
+      }),
+    );
+    const choices = [];
+    let hasExplicit = false;
+    for (let j = 0; j < 8; j++) {
+      const col = choiceIndices[j];
+      if (col < 0 || !clean(row[col])) continue;
+      let val = clean(row[col]);
+      const inline = /(?:\s*\*|\s*[✓✔✅☑])\s*$/.test(val);
+      val = val.replace(/(?:\s*\*|\s*[✓✔✅☑])\s*$/, "").trim();
+      const mark = choiceFlagIndices[j] >= 0 ? norm(row[choiceFlagIndices[j]]) : "";
+      const flagged = ["1", "true", "yes", "oui", "vrai", "correct", "x", "ok"].includes(mark);
+      const correct = inline || flagged || selected.has(alpha[j]);
+      if (correct) hasExplicit = true;
+      choices.push({ text: val, correct });
+    }
+    if (choices.length < 2) {
+      warn.push(`Ligne ${r + 1} : moins de deux propositions`);
+      continue;
+    }
+    if (!hasExplicit && key) {
+      const keys = keyTokens(key);
+      // Des fichiers utilisent la réponse littérale plutôt que A/B ou 1/2.
+      for (const c of choices)
+        if (norm(c.text) === norm(key)) {
+          c.correct = true;
+          hasExplicit = true;
+        }
+    }
+    const ncorrect = choices.filter((c) => c.correct).length;
+    const typeExplicit =
+      tag.includes("qrm") ||
+      tag.includes("multiple") ||
+      tag === "multi" ||
+      tag === "mcq" ||
+      tag.includes("qru") ||
+      tag.includes("unique") ||
+      tag.includes("single");
+    const type =
+      tag.includes("qrm") || tag.includes("multiple") || tag === "multi"
+        ? "multiple"
+        : tag.includes("qru") || tag.includes("unique") || tag.includes("single")
+          ? "single"
+          : ncorrect > 1
+            ? "multiple"
+            : "single";
+    // MCQ peut correspondre à QRU ou QRM selon le nombre de bonnes réponses.
+    const typeReview = (tag === "mcq" && !ncorrect) || (!typeExplicit && !ncorrect);
+    out.push(
+      question(stem, type, choices, source, {
+        correctionStatus: hasExplicit ? "confirmed" : "missing",
+        typeNeedsReview: !!typeReview,
+        correctionDetail: !hasExplicit && key ? "Corrigé non interprété : " + key : "",
+      }),
+    );
+    if (key && !hasExplicit) warn.push(`Ligne ${r + 1} : clé de correction non interprétée (« ${key} »)`);
+  }
+  if (!out.length) warn.push("Aucune ligne QCM exploitable dans la feuille");
+  return { questions: out, warnings: warn };
+}
+function parseCSV(csv, source) {
+  const rows = [],
+    str = String(csv).replace(/^\ufeff/, "");
+  const first = str.split(/\r?\n/).find((x) => x.trim()) || "";
+  const delimiters = [";", ",", "\t"];
+  let delimiter = delimiters.map((d) => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  let row = [],
+    word = "",
+    quoted = false;
+  for (let i = 0; i < str.length; i++) {
+    let c = str[i];
+    if (c === '"') {
+      if (quoted && str[i + 1] === '"') {
+        word += '"';
+        i++;
+      } else quoted = !quoted;
+    } else if (c === delimiter && !quoted) {
+      row.push(word);
+      word = "";
+    } else if ((c === "\n" || c === "\r") && !quoted) {
+      if (c === "\r" && str[i + 1] === "\n") i++;
+      row.push(word);
+      word = "";
+      rows.push(row);
+      row = [];
+    } else word += c;
+  }
+  row.push(word);
+  rows.push(row);
+  return parseSpreadsheet(
+    rows.filter((r) => r.some((x) => clean(x))),
+    source,
+  );
+}
+function resolveZipPath(base, target) {
+  if (target.startsWith("/")) return target.slice(1);
+  let parts = (base + target).split("/"),
+    result = [];
+  for (let p of parts) {
+    if (p === "..") result.pop();
+    else if (p && p !== ".") result.push(p);
+  }
+  return result.join("/");
+}
+
+/* ---------- Lecture des fichiers ---------- */
+
+// Les fichiers .docx, .xlsx et les archives QTI sont des ZIP. On lit le
+// répertoire central de l'archive, puis on décompresse les seuls fichiers utiles
+// avec DecompressionStream, disponible dans les navigateurs récents.
+function readZip(buffer) {
+  const u8 = new Uint8Array(buffer);
+  const dv = new DataView(buffer);
+  let end = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) {
+      end = i;
+      break;
+    }
+  }
+  if (end < 0) throw Error("Archive illisible");
+  const count = dv.getUint16(end + 10, true);
+  let p = dv.getUint32(end + 16, true);
+  const entries = new Map();
+  const decoder = new TextDecoder("utf-8");
+  for (let n = 0; n < count; n++) {
+    if (p + 46 > u8.length || dv.getUint32(p, true) !== 0x02014b50) throw Error("Archive illisible");
+    const nameLength = dv.getUint16(p + 28, true);
+    entries.set(decoder.decode(u8.subarray(p + 46, p + 46 + nameLength)), {
+      flags: dv.getUint16(p + 8, true),
+      method: dv.getUint16(p + 10, true),
+      size: dv.getUint32(p + 20, true),
+      offset: dv.getUint32(p + 42, true),
+    });
+    p += 46 + nameLength + dv.getUint16(p + 30, true) + dv.getUint16(p + 32, true);
+  }
+  return { u8, dv, entries };
+}
+
+// Renvoie le texte d'un fichier de l'archive, ou null s'il n'existe pas.
+async function zipText(zip, name) {
+  const entry = zip.entries.get(name);
+  if (!entry) return null;
+  if (entry.flags & 1) throw Error("Fichier protégé par un mot de passe");
+  const header = entry.offset;
+  const start = header + 30 + zip.dv.getUint16(header + 26, true) + zip.dv.getUint16(header + 28, true);
+  const data = zip.u8.subarray(start, start + entry.size);
+  let bytes = data;
+  if (entry.method === 8) {
+    if (typeof DecompressionStream === "undefined")
+      throw Error("Navigateur trop ancien pour lire ce fichier");
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+  } else if (entry.method !== 0) {
+    throw Error("Compression non prise en charge");
+  }
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+// Fichiers texte et CSV : UTF-8 si possible, sinon encodage Windows
+// (celui des CSV enregistrés par Excel sous Windows).
+async function readText(file) {
+  const buffer = await file.arrayBuffer();
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+  } catch {
+    return new TextDecoder("windows-1252").decode(buffer);
+  }
+}
+
+async function xlsxFromZip(zip, source) {
+  let shared = [];
+  const sharedText = await zipText(zip, "xl/sharedStrings.xml");
+  if (sharedText !== null) shared = all(xmlParse(sharedText), "si").map(elText);
+  const workbookText = await zipText(zip, "xl/workbook.xml");
+  if (workbookText === null) throw Error("Classeur Excel illisible");
+  const workbook = xmlParse(workbookText);
+  const rels = {};
+  const relsText = await zipText(zip, "xl/_rels/workbook.xml.rels");
+  if (relsText !== null) {
+    for (const e of all(xmlParse(relsText), "Relationship"))
+      rels[e.getAttribute("Id")] = e.getAttribute("Target");
+  }
+  const merged = { questions: [], warnings: [] };
+  for (const sheet of all(workbook, "sheet")) {
+    const name = sheet.getAttribute("name") || "Feuille";
+    const rid =
+      sheet.getAttribute("r:id") ||
+      sheet.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+    const target = rels[rid];
+    const path = target ? resolveZipPath("xl/", target) : "xl/worksheets/sheet1.xml";
+    const sheetText = await zipText(zip, path);
+    if (sheetText === null) {
+      merged.warnings.push(`Feuille « ${name} » absente de l'archive`);
+      continue;
+    }
+    const parsed = parseSpreadsheet(rowsFromSheet(xmlParse(sheetText), shared), source + ", feuille " + name);
+    merged.questions.push(...parsed.questions);
+    merged.warnings.push(...parsed.warnings.map((w) => name + " : " + w));
+  }
+  return merged;
+}
+
+const QTI_ROOTS = [
+  "assessmentItem",
+  "qti-assessment-item",
+  "quiz",
+  "questestinterop",
+  "item",
+  "assessment",
+  "section",
+  "assessmentTest",
+  "qti-assessment-test",
+];
+
+async function parseFile(file) {
+  const name = file.name;
+  const ext = name.toLowerCase().split(".").pop();
+  if (ext === "docx") {
+    const raw = await zipText(readZip(await file.arrayBuffer()), "word/document.xml");
+    if (raw === null) throw Error("Fichier DOCX sans document.xml");
+    const result = parseText(parseWord(xmlParse(raw)), name);
+    if (/<w:(?:drawing|pict|object)\b/.test(raw)) {
+      result.warnings.unshift("images ou objets non repris, vérifiez les questions");
+    }
+    return result;
+  }
+  if (ext === "xlsx") return await xlsxFromZip(readZip(await file.arrayBuffer()), name);
+  if (ext === "zip") {
+    const zip = readZip(await file.arrayBuffer());
+    const out = [];
+    const warnings = [];
+    const paths = [...zip.entries.keys()].filter(
+      (p) =>
+        p.toLowerCase().endsWith(".xml") &&
+        !p.startsWith("__MACOSX/") &&
+        !/imsmanifest\.xml$|pool\.xml$|assessmenttest\.xml$/i.test(p),
+    );
+    for (const path of paths) {
+      try {
+        const data = await zipText(zip, path);
+        if (!QTI_ROOTS.includes(xmlParse(data).documentElement.localName)) continue;
+        const parsed = parseXMLString(data, name + " / " + path);
+        out.push(...parsed.questions);
+        warnings.push(...parsed.warnings);
+      } catch (err) {
+        warnings.push(path + " : " + err.message);
+      }
+    }
+    if (!out.length) warnings.push("Archive QTI : aucune question prise en charge détectée");
+    return { questions: out, warnings };
+  }
+  if (ext === "xml") return parseXMLString(await readText(file), name);
+  if (ext === "txt") return parseText(await readText(file), name);
+  if (ext === "csv") return parseCSV(await readText(file), name);
+  if (ext === "doc") throw Error("ancien format .doc, à enregistrer d'abord au format .docx");
+  throw Error("Extension non prise en charge : ." + ext);
+}
+
+/* ---------- Export ---------- */
+
+function fileSave(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2500);
+}
+function baseName() {
+  return (
+    ($("titre").value.trim() || "QCM")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^A-Za-z0-9_-]+/g, "_")
+      .replace(/^_+|_+$/g, "")
+      .slice(0, 70) || "QCM"
+  );
+}
+function officialQuestion(q, i) {
+  const n = i + 1,
+    ty = q.type === "multiple" ? "MULTIPLECHOICE" : "SINGLECHOICE",
+    id = "QUESTION_" + n,
+    rights = q.choices
+      .map((c, j) => (c.correct ? `            <value>CHOICE_${n}_${alpha[j]}</value>` : null))
+      .filter(Boolean)
+      .join("\n");
+  const options = q.choices
+    .map(
+      (c, j) =>
+        `            <simpleChoice identifier="CHOICE_${n}_${alpha[j]}" label="${xe(c.text)}">\n                <div>\n                  <p>${xe(c.text)}</p>\n                </div>\n            </simpleChoice>`,
+    )
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" 
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                identifier="${ty}_${id}" 
+                title="Q${n}" 
+                timeDependent="false" 
+                adaptive="false" 
+                xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd">
+    
+    <responseDeclaration identifier="RESPONSE" cardinality="${q.type}" baseType="identifier">
+        <correctResponse>
+${rights}
+        </correctResponse>
+    </responseDeclaration>
+    
+    <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="integer">
+        <defaultValue><value>0</value></defaultValue>
+    </outcomeDeclaration>
+    
+    <itemBody>
+        <choiceInteraction responseIdentifier="RESPONSE" maxChoices="${q.type === "multiple" ? q.choices.length : 1}">
+            <prompt><div><p>${xe(q.text)}</p></div></prompt>
+${options}
+        </choiceInteraction>
+    </itemBody>
+</assessmentItem>`;
+}
+function officialPool() {
+  const id = ($("identifiant").value.trim() || "TEST_001").replace(/[^A-Za-z0-9_\-]/g, "_");
+  const title = xe($("titre").value || "Banque de QCM");
+  const instructions = clean($("consignes").value);
+  const rubric = instructions
+    ? `        <rubricBlock view="candidate"><div><p>${xe(instructions)}</p></div></rubricBlock>\n`
+    : "";
+  const refs = etat.questions
+    .map((q, i) => {
+      const type = q.type === "multiple" ? "MULTIPLECHOICE" : "SINGLECHOICE";
+      return `        <assessmentItemRef identifier="${type}_QUESTION_${i + 1}" required="true" fixed="false" href="QUESTION_${i + 1}.xml">
+            <weight identifier="WEIGHT" value="1"/>
+        </assessmentItemRef>`;
+    })
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<testPart xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          identifier="${id}" navigationMode="nonlinear" submissionMode="individual"
+          xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd">
+    <assessmentSection identifier="${id}_SECTION" required="false" fixed="false" title="${title}" visible="true" keepTogether="true">
+${rubric}${refs}
+    </assessmentSection>
+</testPart>`;
+}
+
+// Archive ZIP sans compression : chaque fichier y est copié tel quel.
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (const b of bytes) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+function createZip(files) {
+  const encoder = new TextEncoder();
+  const now = new Date();
+  const time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  for (const file of files) {
+    const name = encoder.encode(file.name);
+    const data = encoder.encode(file.text);
+    const crc = crc32(data);
+    const local = new DataView(new ArrayBuffer(30));
+    local.setUint32(0, 0x04034b50, true);
+    local.setUint16(4, 10, true);
+    local.setUint16(10, time, true);
+    local.setUint16(12, date, true);
+    local.setUint32(14, crc, true);
+    local.setUint32(18, data.length, true);
+    local.setUint32(22, data.length, true);
+    local.setUint16(26, name.length, true);
+    parts.push(local, name, data);
+    const entry = new DataView(new ArrayBuffer(46));
+    entry.setUint32(0, 0x02014b50, true);
+    entry.setUint16(4, 20, true);
+    entry.setUint16(6, 10, true);
+    entry.setUint16(12, time, true);
+    entry.setUint16(14, date, true);
+    entry.setUint32(16, crc, true);
+    entry.setUint32(20, data.length, true);
+    entry.setUint32(24, data.length, true);
+    entry.setUint16(28, name.length, true);
+    entry.setUint32(42, offset, true);
+    central.push(entry, name);
+    offset += 30 + name.length + data.length;
+  }
+  const centralSize = central.reduce((sum, part) => sum + part.byteLength, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true);
+  end.setUint16(10, files.length, true);
+  end.setUint32(12, centralSize, true);
+  end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, end], { type: "application/zip" });
+}
+
+function exportQTI() {
+  if (etat.questions.some((q) => warnings(q).length)) return;
+  const files = etat.questions.map((q, i) => ({
+    name: `QUESTION_${i + 1}.xml`,
+    text: "﻿" + officialQuestion(q, i),
+  }));
+  files.push({ name: "pool.xml", text: "﻿" + officialPool() });
+  fileSave(createZip(files), baseName() + "_QTI_UNESS.zip");
+}
+
+function questionText(q) {
+  return (
+    `${q.type === "multiple" ? "QRM" : "QRU"} : ${q.text}\n` +
+    q.choices.map((c, j) => `${alpha[j]} : ${c.text}${c.correct ? " *" : ""}`).join("\n")
+  );
+}
+
+// Texte affiché dans la page, avec les points à vérifier entre crochets.
+function normalizedText() {
+  return etat.questions
+    .map((q) => {
+      const problems = warnings(q);
+      return questionText(q) + (problems.length ? `\n[À valider : ${problems.join(" ; ")}]` : "");
+    })
+    .join("\n\n");
+}
+
+function exportTXT() {
+  if (etat.questions.some((q) => warnings(q).length)) return;
+  const text = etat.questions.map(questionText).join("\n\n");
+  fileSave(new Blob(["﻿" + text], { type: "text/plain;charset=utf-8" }), baseName() + "_UNESS.txt");
+}
+
+function csvQ(s) {
+  return '"' + String(s ?? "").replace(/"/g, '""') + '"';
+}
+
+function exportCSV() {
+  const rows = [["Type", "Question", ...alpha.split(""), "Bonnes réponses", "Source", "Validation"]];
+  for (const q of etat.questions) {
+    rows.push([
+      q.type === "multiple" ? "QRM" : "QRU",
+      q.text,
+      ...alpha.split("").map((_, i) => q.choices[i]?.text || ""),
+      q.choices
+        .map((c, i) => (c.correct ? alpha[i] : null))
+        .filter(Boolean)
+        .join(","),
+      q.source,
+      warnings(q).join(" | "),
+    ]);
+  }
+  const csv = "﻿" + rows.map((row) => row.map(csvQ).join(";")).join("\r\n");
+  fileSave(new Blob([csv], { type: "text/csv;charset=utf-8" }), baseName() + "_verification.csv");
+}
+
+/* ---------- Interface ---------- */
+
+const etat = { questions: [], fichiers: [], messages: [], edition: -1, aVerifierSeulement: false };
+
+const EXEMPLE = `QRU : Quel examen permet d’évaluer l’ensemble des germes dentaires ?
+A : Une radiographie panoramique *
+B : Une photographie exobuccale
+C : Une téléradiographie de profil
+
+QRM : Quels éléments sont évalués au bilan orthodontique ?
+A : Le stade de denture *
+B : La classe d’Angle *
+C : La couleur des yeux
+D : La typologie verticale *`;
+
+const STATUTS = {
+  confirmed: "corrigé extrait du fichier",
+  manual: "corrigé confirmé manuellement",
+  review: "corrigé extrait, à confirmer",
+  missing: "corrigé non fourni",
+};
+
+function pluriel(n, mot) {
+  return `${n} ${mot}${n > 1 ? "s" : ""}`;
+}
+
+function ajouterResultat(resultat, nom) {
+  etat.questions.push(...resultat.questions);
+  etat.fichiers.push({ nom, nombre: resultat.questions.length });
+  etat.messages.push(...resultat.warnings.map((w) => nom + " : " + w));
+}
+
+async function ajouterFichiers(fichiers) {
+  for (const fichier of fichiers) {
+    try {
+      ajouterResultat(await parseFile(fichier), fichier.name);
+    } catch (err) {
+      ajouterResultat({ questions: [], warnings: [err.message] }, fichier.name);
+    }
+  }
+  afficher();
+}
+
+function afficher() {
+  afficherFichiers();
+  afficherListe();
+  afficherResume();
+}
+
+function afficherFichiers() {
+  $("fichiersLus").innerHTML = etat.fichiers
+    .map((f) => `<li><b>${esc(f.nom)}</b> : ${pluriel(f.nombre, "question")}</li>`)
+    .join("");
+  const n = etat.messages.length;
+  $("messages").hidden = !n;
+  $("messages").innerHTML = n
+    ? `<summary>${pluriel(n, "avertissement")} à la lecture</summary><ul>${etat.messages
+        .map((m) => `<li>${esc(m)}</li>`)
+        .join("")}</ul>`
+    : "";
+}
+
+// Met à jour le bilan et l'export sans redessiner la liste,
+// pour ne pas perdre la saisie en cours dans une question ouverte.
+function afficherResume() {
+  const qs = etat.questions;
+  const aVerifier = qs.filter((q) => warnings(q).length).length;
+  const qru = qs.filter((q) => q.type === "single").length;
+  $("bilan").textContent = qs.length
+    ? `${pluriel(qs.length, "question")} : ${qru} QRU, ${qs.length - qru} QRM. ` +
+      `${pluriel(qs.length - aVerifier, "prête")}, ${aVerifier} à vérifier.`
+    : "Aucune question pour l'instant.";
+  const lot = qs.filter(bulkAcceptable).length;
+  $("outils").hidden = !qs.length;
+  $("toutAccepter").hidden = !lot;
+  $("toutAccepter").textContent =
+    lot > 1 ? `Confirmer les ${lot} corrigés détectés` : "Confirmer le corrigé détecté";
+  $("filtreLabel").hidden = !aVerifier && !etat.aVerifierSeulement;
+
+  const etatExport = $("etatExport");
+  etatExport.textContent = !qs.length
+    ? "Importez des questions pour activer l'export."
+    : aVerifier
+      ? `${pluriel(aVerifier, "question")} à corriger avant l'export.`
+      : "Toutes les questions sont prêtes.";
+  etatExport.className = !qs.length ? "" : aVerifier ? "alerte" : "ok";
+  $("exportQTI").disabled = $("exportTXT").disabled = !qs.length || aVerifier > 0;
+  $("exportCSV").disabled = !qs.length;
+  $("texteNormalise").value = normalizedText();
+}
+
+function afficherListe() {
+  const cartes = etat.questions.map((q, i) => {
+    if (i === etat.edition) return carteEdition(q, i);
+    if (etat.aVerifierSeulement && !warnings(q).length) return "";
+    return carte(q, i);
+  });
+  const vide = etat.questions.length && !cartes.some(Boolean);
+  $("liste").innerHTML = vide ? '<li class="vide">Aucune question à vérifier.</li>' : cartes.join("");
+}
+
+function carte(q, i) {
+  const problemes = warnings(q);
+  const justes = q.choices.filter((c) => c.correct).length;
+  const propositions = q.choices
+    .map(
+      (c, j) =>
+        `<li${c.correct ? ' class="juste"' : ""}><b>${alpha[j] || j + 1}.</b><span>${esc(c.text)}${c.correct ? " ✓" : ""}</span></li>`,
+    )
+    .join("");
+  return `<li class="question${problemes.length ? " a-verifier" : ""}">
+  <div class="entete">
+    <div class="etiquettes"><span class="etiquette">Q${i + 1}</span><span class="etiquette">${q.type === "multiple" ? "QRM" : "QRU"}</span>${
+      problemes.length
+        ? '<span class="etiquette alerte">À vérifier</span>'
+        : '<span class="etiquette ok">Prête</span>'
+    }</div>
+    <button type="button" data-action="ouvrir" data-i="${i}">Modifier</button>
+  </div>
+  <p class="enonce">${esc(q.text)}</p>
+  <ul class="propositions">${propositions}</ul>
+  ${problemes.map((p) => `<p class="probleme">${esc(p)}</p>`).join("")}
+  <p class="source">Source : ${esc(q.source)} · ${pluriel(justes, "réponse")} exacte${justes > 1 ? "s" : ""}</p>
+</li>`;
+}
+
+function carteEdition(q, i) {
+  const details = [q.correctionDetail, q.typeNeedsReview ? "Type QRU ou QRM à confirmer." : ""].filter(
+    Boolean,
+  );
+  const lignes = q.choices
+    .map((c, j) => {
+      const lettre = alpha[j] || j + 1;
+      return `<div class="choix">
+    <b>${lettre}</b>
+    <input type="checkbox" data-champ="juste" data-j="${j}"${c.correct ? " checked" : ""} aria-label="Bonne réponse ${lettre}">
+    <input type="text" data-champ="proposition" data-j="${j}" value="${esc(c.text)}" aria-label="Proposition ${lettre}">
+    <button type="button" data-action="retirer" data-j="${j}" aria-label="Retirer la proposition ${lettre}">×</button>
+  </div>`;
+    })
+    .join("");
+  return `<li class="question edition">
+  <div class="entete">
+    <div class="etiquettes"><span class="etiquette">Q${i + 1}</span></div>
+    <button type="button" class="danger" data-action="supprimer">Supprimer la question</button>
+  </div>
+  <p class="statut">Statut du corrigé : <b>${STATUTS[q.correctionStatus] || ""}</b>${
+    details.length ? "<br>" + esc(details.join(" ")) : ""
+  }</p>
+  <label class="champ" for="enonce-${i}">Énoncé</label>
+  <textarea id="enonce-${i}" data-champ="enonce">${esc(q.text)}</textarea>
+  <label class="champ" for="type-${i}">Type</label>
+  <select id="type-${i}" data-champ="type">
+    <option value="single"${q.type === "single" ? " selected" : ""}>QRU : une seule bonne réponse</option>
+    <option value="multiple"${q.type === "multiple" ? " selected" : ""}>QRM : plusieurs bonnes réponses</option>
+  </select>
+  <p class="champ">Propositions (cochez les bonnes réponses)</p>
+  ${lignes}
+  <div class="actions">
+    <button type="button" data-action="proposition"${q.choices.length >= 8 ? " disabled" : ""}>Ajouter une proposition</button>
+    <button type="button" class="principal" data-action="valider">Valider la question</button>
+    <button type="button" data-action="fermer">Fermer</button>
+  </div>
+</li>`;
+}
+
+function aConfirmer(q, detail) {
+  q.correctionStatus = "review";
+  q.correctionDetail = detail;
+}
+
+function confirmer(q) {
+  q.correctionStatus = "manual";
+  q.correctionDetail = "";
+  q.typeNeedsReview = false;
+}
+
+/* ---------- Événements ---------- */
+
+const depot = $("depot");
+$("fichiers").addEventListener("change", (e) => {
+  ajouterFichiers([...e.target.files]);
+  e.target.value = "";
+});
+for (const type of ["dragenter", "dragover"]) {
+  depot.addEventListener(type, (e) => {
+    e.preventDefault();
+    depot.classList.add("survol");
+  });
+}
+for (const type of ["dragleave", "drop"]) {
+  depot.addEventListener(type, (e) => {
+    e.preventDefault();
+    depot.classList.remove("survol");
+  });
+}
+depot.addEventListener("drop", (e) => ajouterFichiers([...e.dataTransfer.files]));
+// Un fichier lâché à côté du cadre ne doit pas remplacer la page.
+window.addEventListener("dragover", (e) => e.preventDefault());
+window.addEventListener("drop", (e) => e.preventDefault());
+
+$("ajouterTexte").addEventListener("click", () => {
+  const texte = $("texte").value;
+  if (!texte.trim()) return;
+  ajouterResultat(parseText(texte, "Texte collé"), "Texte collé");
+  $("texte").value = "";
+  afficher();
+});
+
+$("exemple").addEventListener("click", () => {
+  ajouterResultat(parseText(EXEMPLE, "Exemple"), "Exemple");
+  afficher();
+});
+
+$("toutAccepter").addEventListener("click", () => {
+  const lot = etat.questions.filter(bulkAcceptable);
+  if (!lot.length) return;
+  const reste = etat.questions.filter((q) => warnings(q).length && !bulkAcceptable(q)).length;
+  const message =
+    `Confirmer en une fois le corrigé de ${pluriel(lot.length, "question")} ?\n\n` +
+    "Seules les réponses cochées sont conservées : les barèmes fractionnaires, les pénalités " +
+    "et les règles de notation particulières ne sont pas repris." +
+    (reste > 1
+      ? `\n\n${reste} autres questions resteront à corriger à la main.`
+      : reste
+        ? "\n\nUne autre question restera à corriger à la main."
+        : "");
+  if (!confirm(message)) return;
+  lot.forEach(confirmer);
+  afficher();
+});
+
+$("filtre").addEventListener("change", (e) => {
+  etat.aVerifierSeulement = e.target.checked;
+  afficher();
+});
+
+$("toutEffacer").addEventListener("click", () => {
+  if (!confirm("Effacer toutes les questions importées ?")) return;
+  Object.assign(etat, { questions: [], fichiers: [], messages: [], edition: -1, aVerifierSeulement: false });
+  $("filtre").checked = false;
+  afficher();
+});
+
+$("liste").addEventListener("click", (e) => {
+  const bouton = e.target.closest("button[data-action]");
+  if (!bouton) return;
+  const action = bouton.dataset.action;
+  if (action === "ouvrir") {
+    etat.edition = Number(bouton.dataset.i);
+    afficher();
+    return;
+  }
+  const i = etat.edition;
+  const q = etat.questions[i];
+  if (!q) return;
+  if (action === "fermer") etat.edition = -1;
+  if (action === "valider") {
+    confirmer(q);
+    etat.edition = -1;
+  }
+  if (action === "supprimer") {
+    if (!confirm("Supprimer cette question ?")) return;
+    etat.questions.splice(i, 1);
+    etat.edition = -1;
+  }
+  if (action === "proposition" && q.choices.length < 8) {
+    q.choices.push({ text: "", correct: false });
+    aConfirmer(q, "Propositions modifiées, correction à confirmer");
+  }
+  if (action === "retirer") {
+    q.choices.splice(Number(bouton.dataset.j), 1);
+    aConfirmer(q, "Propositions modifiées, correction à confirmer");
+  }
+  afficher();
+  if (action === "proposition") [...$("liste").querySelectorAll('[data-champ="proposition"]')].pop()?.focus();
+});
+
+$("liste").addEventListener("input", (e) => {
+  const q = etat.questions[etat.edition];
+  const champ = e.target.dataset.champ;
+  if (!q) return;
+  if (champ === "enonce") q.text = e.target.value;
+  else if (champ === "proposition") q.choices[Number(e.target.dataset.j)].text = e.target.value;
+  else return;
+  afficherResume();
+});
+
+$("liste").addEventListener("change", (e) => {
+  const q = etat.questions[etat.edition];
+  const champ = e.target.dataset.champ;
+  if (!q) return;
+  if (champ === "type") {
+    q.type = e.target.value;
+    q.typeNeedsReview = false;
+  } else if (champ === "juste") {
+    q.choices[Number(e.target.dataset.j)].correct = e.target.checked;
+    aConfirmer(q, "Modification manuelle à confirmer");
+  } else return;
+  afficherResume();
+});
+
+$("exportQTI").addEventListener("click", exportQTI);
+$("exportTXT").addEventListener("click", exportTXT);
+$("exportCSV").addEventListener("click", exportCSV);
+
+$("copier").addEventListener("click", async () => {
+  const zone = $("texteNormalise");
+  if (!zone.value) return;
+  try {
+    await navigator.clipboard.writeText(zone.value);
+  } catch {
+    zone.select();
+    document.execCommand("copy");
+  }
+  $("copier").textContent = "Copié";
+  setTimeout(() => ($("copier").textContent = "Copier"), 1300);
+});
+
+afficher();
+</script>
+</body>
+</html>
