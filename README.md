@@ -14,7 +14,7 @@ L'application lit ces fichiers, reconnaît les questions et leurs propositions, 
 
 L'application tient dans un seul fichier, `index.html`. On peut l'ouvrir en ligne à l'adresse https://acavare.github.io/convertisseur-UNESS-QCM/, ou la télécharger (bouton « Code », puis « Download ZIP ») et ouvrir `index.html` d'un double-clic : elle fonctionne alors sans connexion.
 
-1. Déposez un ou plusieurs fichiers dans le cadre, ou collez les questions sous forme de texte.
+1. Déposez un ou plusieurs fichiers dans le cadre, ou collez les questions sous forme de texte. On peut aussi créer les questions directement dans la page avec « + Ajouter une question ».
 2. Parcourez la liste. Une question marquée « À vérifier » n'a pas de corrigé exploitable : cliquez sur « Modifier », cochez les bonnes réponses, puis sur « Valider la question ».
 3. Une fois toutes les questions prêtes, indiquez le titre et l'identifiant de la banque, puis téléchargez l'archive QTI (.zip).
 4. Dans Uness Evaluation Studio, cliquez sur « Import QTI » dans le menu de gauche, déposez l'archive, puis cliquez sur « Importer ». La fiche d'aide de l'UNESS [Comment réaliser un import QTI dans le Studio ?](https://assistance.uness.fr/pluginfile.php/276/mod_resource/content/1/Studio_import_QTI_202507.pdf) détaille la procédure.
@@ -78,7 +78,7 @@ Le fichier [exemple/modele-qcm.xlsx](exemple/modele-qcm.xlsx) peut servir de poi
 
 Chaque question doit avoir un énoncé, entre deux et huit propositions non vides et au moins une bonne réponse. Une QRU en a exactement une. Quand le fichier ne donne pas de corrigé certain, la question reste « À vérifier » : l'application ne devine jamais une bonne réponse.
 
-Les barèmes particuliers (pourcentages Moodle, pénalités, points QTI) ne passent pas dans l'archive : seules les bonnes réponses sont conservées. Les questions concernées sont signalées. Si leurs réponses cochées sont justes, un bouton au-dessus de la liste permet de les confirmer en une fois.
+Les barèmes particuliers (pourcentages Moodle, pénalités, points QTI) ne passent pas dans l'archive : seules les bonnes réponses sont conservées. Les questions concernées sont signalées. Si leurs réponses cochées sont justes, le bouton « Tout accepter » les confirme en une fois.
 
 ## Ce qui est exporté
 

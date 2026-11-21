@@ -77,6 +77,7 @@ label.champ, p.champ { display: block; margin: 12px 0 4px; font-size: 0.86rem; f
 .choix button { flex: none; }
 .vide { color: var(--discret); font-size: 0.92rem; }
 #etatExport { margin-top: 14px; font-weight: 700; }
+#noteLot { margin-top: 8px; }
 #etatExport.ok { color: var(--ok); }
 #etatExport.alerte { color: var(--alerte); }
 footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align: center; }
@@ -117,11 +118,13 @@ footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align:
     <h2>2. Vérifier les questions</h2>
     <p id="bilan">Aucune question pour l'instant.</p>
     <div class="actions" id="outils" hidden>
-      <button type="button" class="principal" id="toutAccepter" hidden></button>
+      <button type="button" class="principal" id="toutAccepter" disabled title="Confirmer en une fois les corrigés déjà détectés, sans inventer de réponses">Tout accepter</button>
       <label class="filtre" id="filtreLabel" hidden><input type="checkbox" id="filtre"> N'afficher que les questions à vérifier</label>
       <button type="button" class="danger" id="toutEffacer">Tout effacer</button>
     </div>
+    <p class="discret" id="noteLot" hidden></p>
     <ol class="questions" id="liste"></ol>
+    <div class="actions" style="margin-top: 14px"><button type="button" id="ajouterQuestion">+ Ajouter une question</button></div>
   </section>
 
   <section class="carte">
@@ -132,7 +135,7 @@ footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align:
     <input type="text" id="identifiant" value="TEST_001">
     <label class="champ" for="consignes">Consignes aux étudiants (facultatif)</label>
     <textarea id="consignes"></textarea>
-    <p id="etatExport">Importez des questions pour activer l'export.</p>
+    <p id="etatExport">Importez ou ajoutez des questions pour activer l'export.</p>
     <div class="actions">
       <button type="button" class="principal" id="exportQTI" disabled>Télécharger l'archive QTI (.zip)</button>
       <button type="button" id="exportTXT" disabled>Texte (.txt)</button>
@@ -1506,14 +1509,17 @@ function afficherResume() {
     : "Aucune question pour l'instant.";
   const lot = qs.filter(bulkAcceptable).length;
   $("outils").hidden = !qs.length;
-  $("toutAccepter").hidden = !lot;
-  $("toutAccepter").textContent =
-    lot > 1 ? `Confirmer les ${lot} corrigés détectés` : "Confirmer le corrigé détecté";
+  $("toutAccepter").disabled = !lot;
+  $("noteLot").hidden = !lot;
+  $("noteLot").textContent =
+    lot > 1
+      ? `${lot} questions ont un corrigé détecté qui reste à confirmer.`
+      : "Une question a un corrigé détecté qui reste à confirmer.";
   $("filtreLabel").hidden = !aVerifier && !etat.aVerifierSeulement;
 
   const etatExport = $("etatExport");
   etatExport.textContent = !qs.length
-    ? "Importez des questions pour activer l'export."
+    ? "Importez ou ajoutez des questions pour activer l'export."
     : aVerifier
       ? `${pluriel(aVerifier, "question")} à corriger avant l'export.`
       : "Toutes les questions sont prêtes.";
@@ -1568,7 +1574,7 @@ function carteEdition(q, i) {
       return `<div class="choix">
     <b>${lettre}</b>
     <input type="checkbox" data-champ="juste" data-j="${j}"${c.correct ? " checked" : ""} aria-label="Bonne réponse ${lettre}">
-    <input type="text" data-champ="proposition" data-j="${j}" value="${esc(c.text)}" aria-label="Proposition ${lettre}">
+    <input type="text" data-champ="proposition" data-j="${j}" value="${esc(c.text)}" placeholder="Proposition ${lettre}" aria-label="Proposition ${lettre}">
     <button type="button" data-action="retirer" data-j="${j}" aria-label="Retirer la proposition ${lettre}">×</button>
   </div>`;
     })
@@ -1582,7 +1588,7 @@ function carteEdition(q, i) {
     details.length ? "<br>" + esc(details.join(" ")) : ""
   }</p>
   <label class="champ" for="enonce-${i}">Énoncé</label>
-  <textarea id="enonce-${i}" data-champ="enonce">${esc(q.text)}</textarea>
+  <textarea id="enonce-${i}" data-champ="enonce" placeholder="Énoncé de la question">${esc(q.text)}</textarea>
   <label class="champ" for="type-${i}">Type</label>
   <select id="type-${i}" data-champ="type">
     <option value="single"${q.type === "single" ? " selected" : ""}>QRU : une seule bonne réponse</option>
@@ -1604,6 +1610,8 @@ function aConfirmer(q, detail) {
 }
 
 function confirmer(q) {
+  q.text = clean(q.text);
+  for (const c of q.choices) c.text = clean(c.text);
   q.correctionStatus = "manual";
   q.correctionDetail = "";
   q.typeNeedsReview = false;
@@ -1670,10 +1678,22 @@ $("filtre").addEventListener("change", (e) => {
 });
 
 $("toutEffacer").addEventListener("click", () => {
-  if (!confirm("Effacer toutes les questions importées ?")) return;
+  if (!confirm("Effacer toutes les questions ?")) return;
   Object.assign(etat, { questions: [], fichiers: [], messages: [], edition: -1, aVerifierSeulement: false });
   $("filtre").checked = false;
   afficher();
+});
+
+$("ajouterQuestion").addEventListener("click", () => {
+  const vide = { text: "", correct: false };
+  etat.questions.push(
+    question("", "single", [vide, vide], "Création manuelle", { correctionStatus: "missing" }),
+  );
+  etat.edition = etat.questions.length - 1;
+  afficher();
+  const carteOuverte = $("liste").querySelector(".edition");
+  carteOuverte.scrollIntoView({ block: "center" });
+  carteOuverte.querySelector("textarea").focus({ preventScroll: true });
 });
 
 $("liste").addEventListener("click", (e) => {
