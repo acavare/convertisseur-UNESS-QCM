@@ -1,25 +1,23 @@
 # QCM Studio
 
-Petite application web qui convertit des QRU et des QRM venant de Word, d'Excel, de Moodle ou d'un fichier QTI en une archive à importer dans Uness Evaluation Studio.
+QCM Studio est une application web qui convertit des QRU et des QRM venant de Word, de Wooclap, d'Excel, de Moodle ou d'un fichier QTI en une archive à importer dans Uness Evaluation Studio (QTI au format SIDES).
 
 ![Aperçu de l'application](docs/apercu.png)
 
-## Le principe
+## Contexte
 
 Uness Evaluation Studio importe des questions au format QTI, mais les questions existent souvent ailleurs : dans un document Word, un tableau Excel, une banque Moodle ou un export Wooclap. Les ressaisir une à une dans le Studio prend du temps.
 
-L'application lit ces fichiers, reconnaît les questions et leurs propositions, et reprend le corrigé quand il figure dans le fichier. Les questions dont le corrigé manque ou reste ambigu sont signalées et se corrigent dans la page. L'archive QTI n'est produite qu'une fois toutes les questions prêtes.
+L'application lit ces fichiers, reconnaît les questions et leurs propositions, et reprend le corrigé quand il figure dans le fichier. Les questions dont le corrigé manque ou reste ambigu sont signalées et se corrigent dans la page. L'archive QTI n'est produite qu'une fois toutes les questions prêtes et peut être directement importée dans Uness Evaluation Studio.
 
 ## Utilisation
 
-L'application tient dans un seul fichier, `index.html`. On peut l'ouvrir en ligne à l'adresse https://acavare.github.io/convertisseur-UNESS-QCM/, ou la télécharger (bouton « Code », puis « Download ZIP ») et ouvrir `index.html` d'un double-clic : elle fonctionne alors sans connexion.
+L'application tient dans un seul fichier, `index.html`. On peut l'ouvrir en ligne à l'adresse https://acavare.github.io/convertisseur-UNESS-QCM/, ou la télécharger (bouton « Code », puis « Download ZIP ») et ouvrir `index.html` d'un double-clic.
 
 1. Déposez un ou plusieurs fichiers dans le cadre, ou collez les questions sous forme de texte. On peut aussi créer les questions directement dans la page avec « + Ajouter une question ».
-2. Parcourez la liste. Une question marquée « À vérifier » n'a pas de corrigé exploitable : cliquez sur « Modifier », cochez les bonnes réponses, puis sur « Valider la question ».
+2. Parcourez la liste. Une question marquée « À vérifier » n'a pas de corrigé exploitable : cliquez sur « Modifier », cochez les bonnes réponses, puis sur « Valider la question ». Si les erreurs signalées sont uniquement liées au barème de notation exporté depuis Moodle, il est possible de 
 3. Une fois toutes les questions prêtes, indiquez le titre et l'identifiant de la banque, puis téléchargez l'archive QTI (.zip).
 4. Dans Uness Evaluation Studio, cliquez sur « Import QTI » dans le menu de gauche, déposez l'archive, puis cliquez sur « Importer ». La fiche d'aide de l'UNESS [Comment réaliser un import QTI dans le Studio ?](https://assistance.uness.fr/pluginfile.php/276/mod_resource/content/1/Studio_import_QTI_202507.pdf) détaille la procédure.
-
-Mieux vaut faire un premier essai avec une petite banque avant d'importer les autres.
 
 ## Écrire les questions
 
