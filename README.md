@@ -15,7 +15,7 @@ L'application lit ces fichiers, reconnaît les questions et leurs propositions, 
 L'application tient dans un seul fichier, `index.html`. On peut l'ouvrir en ligne à l'adresse https://acavare.github.io/convertisseur-UNESS-QCM/, ou la télécharger (bouton « Code », puis « Download ZIP ») et ouvrir `index.html` d'un double-clic.
 
 1. Déposez un ou plusieurs fichiers dans le cadre, ou collez les questions sous forme de texte. On peut aussi créer les questions directement dans la page avec « + Ajouter une question ».
-2. Parcourez la liste. Une question marquée « À vérifier » n'a pas de corrigé exploitable : cliquez sur « Modifier », cochez les bonnes réponses, puis sur « Valider la question ». Si les erreurs signalées sont uniquement liées au barème de notation exporté depuis Moodle, il est possible de 
+2. Parcourez la liste. Une question marquée « À vérifier » n'a pas de corrigé exploitable : cliquez sur « Modifier », cochez les bonnes réponses, puis sur « Valider la question ». Si les erreurs signalées sont uniquement liées au barème de notation exporté depuis Moodle, il est possible de valider l'ensemble des questions avec le bouton "Tout accepter"
 3. Une fois toutes les questions prêtes, indiquez le titre et l'identifiant de la banque, puis téléchargez l'archive QTI (.zip).
 4. Dans Uness Evaluation Studio, cliquez sur « Import QTI » dans le menu de gauche, déposez l'archive, puis cliquez sur « Importer ». La fiche d'aide de l'UNESS [Comment réaliser un import QTI dans le Studio ?](https://assistance.uness.fr/pluginfile.php/276/mod_resource/content/1/Studio_import_QTI_202507.pdf) détaille la procédure.
 
@@ -78,19 +78,20 @@ Chaque question doit avoir un énoncé, entre deux et huit propositions non vide
 
 Les barèmes particuliers (pourcentages Moodle, pénalités, points QTI) ne passent pas dans l'archive : seules les bonnes réponses sont conservées. Les questions concernées sont signalées. Si leurs réponses cochées sont justes, le bouton « Tout accepter » les confirme en une fois.
 
-## Ce qui est exporté
+## Export
 
+Voici les éléments exportés: 
 - L'archive QTI (.zip) : un fichier `QUESTION_n.xml` par question, au format QTI 2.1, et un fichier `pool.xml` qui les réunit avec le titre, l'identifiant et les consignes éventuelles.
 - Le texte des questions (.txt), dans le format décrit plus haut.
 - Un tableau de vérification (.csv) à ouvrir dans Excel : une ligne par question, avec le corrigé, le fichier d'origine et les points restant à vérifier.
 
 ## Limites
 
-Seules les QRU et les QRM sont prises en charge, avec huit propositions au plus. Les images, les équations et la mise en forme ne sont pas reprises : dans un fichier Word, les images sont ignorées ; dans un fichier Moodle ou QTI, une question qui en contient est écartée. Un avertissement le signale dans les deux cas. Les anciens fichiers .doc ne sont pas lus : il faut d'abord les enregistrer au format .docx.
+Seules les QRU et les QRM sont prises en charge, avec huit propositions au plus. Les images, les équations et la mise en forme ne sont pas reprises. Dans un fichier Word, les images sont ignorées. Dans un fichier Moodle ou QTI, une question qui en contient est écartée. Un avertissement le signale dans les deux cas. Les anciens fichiers .doc ne sont pas lus : il faut d'abord les enregistrer au format .docx.
 
 ## Confidentialité
 
-Les fichiers sont lus dans le navigateur et ne sont envoyés nulle part. L'application ne charge aucune ressource extérieure.
+Les fichiers sont lus dans le navigateur et ne sont envoyés nulle part sur internet. L'application ne charge aucune ressource extérieure.
 
 ## Compatibilité
 
@@ -105,4 +106,4 @@ Toute version de Chrome, Edge, Firefox ou Safari parue depuis 2023.
 
 ## Mention légale
 
-<sub>© 2026 Anaïs Cavaré. Code distribué sous licence MIT (voir le fichier LICENSE). Outil indépendant, sans lien avec l'UNESS ; Uness Evaluation Studio est un service de l'UNESS. Fourni sans garantie : vérifiez toujours les questions et leur corrigé dans le Studio avant de les utiliser pour une épreuve. Développé avec l'aide de Claude (Anthropic).</sub>
+<sub>© 2026 Anaïs Cavaré. Code distribué sous licence MIT (voir le fichier LICENSE). Outil indépendant, sans lien avec l'UNESS ; Uness Evaluation Studio est un service de l'UNESS. Fourni sans garantie : vérifiez toujours les questions et leur corrigé dans le Studio avant de les utiliser pour une épreuve. Développé avec l'aide de Claude (Anthropic) modèle Opus 5.5.</sub>
