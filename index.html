@@ -149,7 +149,7 @@ footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align:
     </details>
   </section>
 
-  <footer>© 2026 Anaïs Cavaré · Licence MIT · Outil indépendant, sans lien avec l'UNESS · Aucune donnée n'est envoyée</footer>
+  <footer>© 2026 Anaïs Cavaré · Licence MIT · Outil indépendant, sans lien avec l'UNESS · Aucune donnée n'est envoyée sur internet</footer>
 </main>
 <script>
 "use strict";
@@ -157,12 +157,12 @@ footer { margin-top: 8px; font-size: 0.75rem; color: var(--discret); text-align:
   QCM Studio
   Convertit des QRU et des QRM (Word, Excel, CSV, texte, Moodle XML, QTI)
   en archive QTI 2.1 pour Uness Evaluation Studio.
-  Tout se passe dans le navigateur : aucun fichier n'est envoyé.
+  Tout se passe dans le navigateur : aucun fichier n'est envoyé sur internet.
 */
 const $ = (id) => document.getElementById(id);
 const alpha = "ABCDEFGH";
 
-/* ---------- Outils ---------- */
+/* Outils */
 
 function esc(s) {
   return String(s ?? "").replace(
@@ -217,7 +217,7 @@ function xmlParse(s) {
   return d;
 }
 
-/* ---------- Questions et contrôles ---------- */
+/* Questions et contrôles */
 
 function question(text, type, choices, source = "Saisie", meta = {}) {
   const cleanChoices = choices.map((c) => ({ text: clean(c.text), correct: !!c.correct }));
@@ -264,7 +264,7 @@ function bulkAcceptable(q) {
   );
 }
 
-/* ---------- Lecture des formats de questions ---------- */
+/* Lecture des formats de questions */
 
 function parseText(raw, source = "Texte") {
   const lines = String(raw).replace(/\r/g, "").split("\n").map(clean),
@@ -579,7 +579,7 @@ function qti1ExactKey(condition, optionIds, responseId) {
     seen.set(id, positive);
   }
   // S'il manque une contrainte, plusieurs jeux de réponses peuvent satisfaire
-  // la règle de score : aucun corrigé certain ne peut être établi.
+  // la règle de score.
   if (seen.size !== optionIds.length) return null;
   const positives = optionIds.filter((id) => seen.get(id) === true);
   return positives.length ? positives : null;
